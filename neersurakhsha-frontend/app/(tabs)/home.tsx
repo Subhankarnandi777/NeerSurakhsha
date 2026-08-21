@@ -44,10 +44,10 @@ export default function Home() {
         {/* Primary Action Button */}
         <View style={styles.primaryActionSection}>
           <Button 
-            variant="terracotta" 
+            variant="secondary" 
             size="lg"
             title="REPORT NEW CASE"
-            icon={<MaterialIcons name="add-alert" size={32} color={colors.onSecondaryContainer} />}
+            icon={<MaterialIcons name="add-alert" size={32} color={colors.onSecondary} />}
             onPress={() => router.push('/health-report')}
           />
           <Text variant="body" color="onSurfaceVariant" style={styles.primaryActionSub}>
@@ -82,13 +82,13 @@ export default function Home() {
           </Card>
 
           {/* Card 3: Critical Sources */}
-          <Card variant="alert" style={[styles.gridCard, isTablet && { width: '31%' }]}>
+          <Card style={[styles.gridCard, isTablet && { width: '31%' }, { borderColor: colors.secondary, borderWidth: 2 }]}>
             <View style={styles.cardHeader}>
-              <Text variant="caption" color="secondaryContainer">CRITICAL SOURCES</Text>
-              <MaterialIcons name="warning" size={20} color={colors.secondaryContainer} />
+              <Text variant="caption" style={{ color: colors.secondary }}>CRITICAL SOURCES</Text>
+              <MaterialIcons name="warning" size={20} color={colors.secondary} />
             </View>
             <View style={styles.cardMetrics}>
-              <Text style={[styles.metricBig, { color: colors.secondaryContainer }]}>{highRiskSources}</Text>
+              <Text style={[styles.metricBig, { color: colors.secondary }]}>{highRiskSources}</Text>
               <Text variant="body" color="onSurfaceVariant">Require Action</Text>
             </View>
           </Card>
@@ -165,7 +165,7 @@ export default function Home() {
       {/* Voice Trigger FAB */}
       <View style={styles.fabContainer}>
         <TouchableOpacity style={styles.voiceFab} activeOpacity={0.8}>
-          <MaterialIcons name="mic" size={32} color={colors.onSecondaryContainer} />
+          <MaterialIcons name="mic" size={32} color={colors.onSecondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.secondaryContainer,
+    backgroundColor: colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',

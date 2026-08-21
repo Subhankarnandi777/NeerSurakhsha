@@ -84,17 +84,17 @@ export default function AlertsDashboard() {
             <View style={[styles.alertCard, styles.alertCardWarning, isTablet && { width: '48%' }]}>
               <View style={styles.alertCardHeader}>
                 <View style={styles.alertTypeBadge}>
-                  <MaterialIcons name="water-drop" size={16} color={colors.onSecondaryContainer} />
-                  <Text style={[styles.alertTypeText, { color: colors.onSecondaryContainer }]}>QUALITY DROP</Text>
+                  <MaterialIcons name="water-drop" size={16} color={colors.secondary} />
+                  <Text style={[styles.alertTypeText, { color: colors.secondary }]}>QUALITY DROP</Text>
                 </View>
               </View>
-              <Text style={[styles.alertHeadline, { color: colors.onSecondaryContainer }]}>Turbidity Spike</Text>
-              <Text style={[styles.alertLocation, { color: colors.onSecondaryContainer }]}>
-                <MaterialIcons name="location-on" size={16} color={colors.onSecondaryContainer} /> Borewell #12, Market Square
+              <Text style={[styles.alertHeadline, { color: colors.secondary }]}>Turbidity Spike</Text>
+              <Text style={[styles.alertLocation, { color: colors.secondary }]}>
+                <MaterialIcons name="location-on" size={16} color={colors.secondary} /> Borewell #12, Market Square
               </Text>
               <View style={styles.alertActions}>
-                <TouchableOpacity style={[styles.actionButtonSecondary, { borderColor: colors.secondaryContainer }]}>
-                  <Text style={[styles.actionButtonSecondaryText, { color: colors.onSecondaryContainer }]}>Dispatch Technician</Text>
+                <TouchableOpacity style={[styles.actionButtonSecondary, { borderColor: colors.secondary }]}>
+                  <Text style={[styles.actionButtonSecondaryText, { color: colors.secondary }]}>Dispatch Technician</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -115,7 +115,7 @@ export default function AlertsDashboard() {
                 <Text style={styles.networkSubtitle}>NETWORK INTEGRITY</Text>
               </View>
               <View style={styles.networkIcon}>
-                <MaterialIcons name="check-circle" size={32} color={colors.tertiaryContainer} />
+                <MaterialIcons name="check-circle" size={32} color={colors.tertiary} />
               </View>
             </View>
             
@@ -136,7 +136,7 @@ export default function AlertsDashboard() {
                 <Text style={styles.sensorIssueTime}>2h</Text>
               </View>
               <View style={styles.sensorIssueLowBat}>
-                <MaterialIcons name="battery-alert" size={18} color={colors.secondaryContainer} />
+                <MaterialIcons name="battery-alert" size={18} color={colors.secondary} />
                 <Text style={styles.sensorIssueText}>Sensor #88 Low Bat</Text>
                 <Text style={styles.sensorIssueBatValue}>12%</Text>
               </View>
@@ -356,8 +356,8 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   alertCardWarning: {
-    backgroundColor: 'rgba(252, 113, 39, 0.1)', // Light secondary
-    borderColor: colors.secondaryContainer,
+    backgroundColor: colors.secondaryContainer, // Light Orange
+    borderColor: colors.secondary, // Orange
   },
   alertCardHeader: {
     flexDirection: 'row',
@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
   networkPercent: {
     fontFamily: 'Montserrat_800ExtraBold',
     fontSize: 48,
-    color: colors.tertiaryContainer,
+    color: colors.tertiary,
     lineHeight: 52,
   },
   networkSubtitle: {
@@ -462,10 +462,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(0, 69, 56, 0.1)',
+    backgroundColor: colors.tertiaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
-    borderColor: colors.tertiaryContainer,
+    borderColor: colors.tertiary,
   },
   progressContainer: {
     marginBottom: 20,
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: colors.tertiaryContainer,
+    backgroundColor: colors.tertiary,
   },
   sensorIssues: {
     gap: 8,
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   sensorIssueBatValue: {
     fontFamily: 'Inter_700Bold',
     fontSize: 14,
-    color: colors.secondaryContainer,
+    color: colors.secondary,
   },
   chartCard: {
     height: 320,
@@ -668,8 +668,8 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   checkboxChecked: {
-    borderColor: colors.tertiaryContainer,
-    backgroundColor: 'rgba(0, 69, 56, 0.2)',
+    borderColor: colors.tertiary,
+    backgroundColor: colors.tertiaryContainer,
   },
   taskContent: {
     flex: 1,
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   taskDueCompleted: {
-    color: colors.tertiaryContainer,
+    color: colors.tertiary,
   },
   taskAssignee: {
     fontFamily: 'Inter_700Bold',

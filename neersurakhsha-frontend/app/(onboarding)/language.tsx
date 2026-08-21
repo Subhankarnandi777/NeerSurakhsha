@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
   },
   continueBtn: {
-    backgroundColor: colors.primaryContainer,
+    backgroundColor: colors.secondary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

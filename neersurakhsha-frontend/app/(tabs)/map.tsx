@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing, rounded } from '../../theme/spacing';
+import { spacing } from '../../theme/spacing';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../../store/main.store';
 import { useRouter } from 'expo-router';
@@ -63,7 +63,7 @@ export default function SafeWaterMap() {
                     <MaterialIcons 
                       name={isSafe ? "water-drop" : "warning"} 
                       size={20} 
-                      color={isSafe ? colors.onTertiaryContainer : colors.onError} 
+                      color={isSafe ? colors.onTertiary : colors.onError} 
                     />
                   </View>
                   <View style={[styles.markerLabel, isSafe ? styles.hcBorder : styles.markerAlertLabelBorder]}>
@@ -90,7 +90,7 @@ export default function SafeWaterMap() {
                 { latitude: 26.18, longitude: 91.72 },
                 { latitude: selectedSource.lat, longitude: selectedSource.lng }
               ]}
-              strokeColor={colors.tertiaryContainer}
+              strokeColor={colors.secondary}
               strokeWidth={4}
               lineDashPattern={[8, 4]}
             />
@@ -116,10 +116,9 @@ export default function SafeWaterMap() {
           </View>
         </View>
 
-        {/* Voice Search FAB */}
         <View style={styles.fabContainer}>
           <TouchableOpacity style={[styles.fab, styles.hcBorder, styles.hcShadow]}>
-            <MaterialIcons name="mic" size={32} color={colors.onSecondaryContainer} />
+            <MaterialIcons name="mic" size={32} color={colors.onSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -134,7 +133,7 @@ export default function SafeWaterMap() {
                 </View>
                 {selectedSource.status === 'SAFE' ? (
                   <View style={[styles.statusBadgeSafe, styles.hcBorder]}>
-                    <MaterialIcons name="check-circle" size={16} color={colors.onTertiaryContainer} />
+                    <MaterialIcons name="check-circle" size={16} color={colors.onTertiary} />
                     <Text style={styles.statusBadgeSafeText}>SAFE</Text>
                   </View>
                 ) : (
@@ -220,10 +219,10 @@ const styles = StyleSheet.create({
   },
   hcShadow: {
     shadowColor: colors.primary,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   markerContainer: {
     alignItems: 'center',
@@ -237,7 +236,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   markerSafe: {
-    backgroundColor: colors.tertiaryContainer,
+    backgroundColor: colors.tertiary,
   },
   markerAlert: {
     backgroundColor: colors.error,
@@ -277,7 +276,7 @@ const styles = StyleSheet.create({
   userLocationInner: {
     width: 8,
     height: 8,
-    backgroundColor: colors.secondaryContainer,
+    backgroundColor: colors.secondary,
     borderRadius: 4,
   },
   legendContainer: {
@@ -308,7 +307,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: colors.tertiaryContainer,
+    backgroundColor: colors.tertiary,
   },
   legendDotAlert: {
     width: 12,
@@ -338,7 +337,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: colors.secondaryContainer,
+    backgroundColor: colors.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -374,7 +373,7 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
   },
   statusBadgeSafe: {
-    backgroundColor: colors.tertiaryContainer,
+    backgroundColor: colors.tertiary,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -385,7 +384,7 @@ const styles = StyleSheet.create({
   statusBadgeSafeText: {
     fontFamily: 'Inter_700Bold',
     fontSize: 14,
-    color: colors.onTertiaryContainer,
+    color: colors.onTertiary,
   },
   statusBadgeAlert: {
     backgroundColor: colors.errorContainer,
