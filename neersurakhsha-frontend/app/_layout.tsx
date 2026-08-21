@@ -5,6 +5,7 @@ import { useFonts as useMontserratFonts, Montserrat_600SemiBold, Montserrat_700B
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useAuthStore } from '../store/auth.store';
 
 // Prevent splash screen from hiding automatically
 SplashScreen.preventAutoHideAsync();
@@ -24,8 +25,14 @@ export default function RootLayout() {
     Montserrat_800ExtraBold,
   });
 
+  const checkSession = useAuthStore(state => state.checkSession);
+
   const loaded = interLoaded && montserratLoaded;
   const error = interError || montserratError;
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
 
   useEffect(() => {
     if (loaded || error) {
