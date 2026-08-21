@@ -1,13 +1,14 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../../store/main.store';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import * as Location from 'expo-location';
 
 const { width } = Dimensions.get('window');
 
@@ -15,10 +16,66 @@ export default function SafeWaterMap() {
   const { sources } = useAppStore();
   const router = useRouter();
 
-  // Selected source for the routing card (simulated for UI)
-  const [selectedSource, setSelectedSource] = useState(sources[0]);
+  // Selected source for the routing card
+  const [selectedSource, setSelectedSource] = useState(sources.length > 0 ? sources[0] : null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const mapRef = useRef<MapView>(null);
 
   const insets = useSafeAreaInsets();
+
+  // Update selected source when sources arrive if it's null
+  useEffect(() => {
+    if (sources.length > 0 && !selectedSource) {
+      setSelectedSource(sources[0]);
+      
+      // Also fit the map to show all these new sources so they aren't off-screen!
+      if (mapRef.current) {
+        mapRef.current.fitToCoordinates(
+          sources.map(s => ({ latitude: s.lat, longitude: s.lng })),
+          { edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }, animated: true }
+        );
+      }
+    }
+  }, [sources]);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Permission to access location was denied');
+        return;
+      }
+
+      let loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc);
+      
+      // Only animate to user if we don't have sources yet, 
+      // otherwise the sources useEffect will handle bounding the map
+      if (mapRef.current && sources.length === 0) {
+        mapRef.current.animateToRegion({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }, 1000);
+      }
+    })();
+  }, []);
+
+  const userLat = location?.coords.latitude || 25.8883;
+  const userLng = location?.coords.longitude || 90.4932;
+
+  const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; 
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return (R * c).toFixed(1);
+  };
+
+  const dynamicDistance = location && selectedSource ? getDistance(userLat, userLng, selectedSource.lat, selectedSource.lng) : '1.2';
+  const dynamicTime = location && selectedSource ? `EST. ${Math.round(parseFloat(dynamicDistance) * 12)} MIN WALK` : 'EST. 15 MIN WALK';
 
   return (
     <View style={[styles.safeArea, { paddingTop: insets.top }]}>
@@ -36,66 +93,79 @@ export default function SafeWaterMap() {
       </View>
 
       <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={{
-            latitude: 26.2,
-            longitude: 91.7,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          }}
-        >
-          {sources.map(source => {
-            const isSafe = source.status === 'SAFE';
-            return (
-              <Marker
-                key={source.id}
-                coordinate={{ latitude: source.lat, longitude: source.lng }}
-                onPress={() => setSelectedSource(source)}
-              >
-                <View style={styles.markerContainer}>
-                  <View style={[
-                    styles.markerIcon,
-                    isSafe ? styles.markerSafe : styles.markerAlert,
-                    isSafe ? styles.hcBorder : styles.markerAlertBorder
-                  ]}>
-                    <MaterialIcons 
-                      name={isSafe ? "water-drop" : "warning"} 
-                      size={20} 
-                      color={isSafe ? colors.onTertiary : colors.onError} 
-                    />
-                  </View>
-                  <View style={[styles.markerLabel, isSafe ? styles.hcBorder : styles.markerAlertLabelBorder]}>
-                    <Text style={[styles.markerLabelText, isSafe ? { color: colors.primary } : { color: colors.error }]}>
-                      {source.name} - {isSafe ? 'Safe' : 'Contaminated'}
-                    </Text>
-                  </View>
-                </View>
-              </Marker>
-            );
-          })}
-
-          {/* User Location Marker (Simulated) */}
-          <Marker coordinate={{ latitude: 26.18, longitude: 91.72 }}>
-            <View style={styles.userLocationOuter}>
-              <View style={styles.userLocationInner} />
-            </View>
-          </Marker>
-
-          {/* Simulated Route Path if a source is selected */}
-          {selectedSource && (
-            <Polyline
-              coordinates={[
-                { latitude: 26.18, longitude: 91.72 },
-                { latitude: selectedSource.lat, longitude: selectedSource.lng }
-              ]}
-              strokeColor={colors.secondary}
-              strokeWidth={4}
-              lineDashPattern={[8, 4]}
+        {Platform.OS === 'web' ? (
+          <iframe 
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${userLng-0.1},${userLat-0.1},${userLng+0.1},${userLat+0.1}&layer=mapnik&marker=${userLat},${userLng}`}
+            style={{ width: '100%', height: '100%', border: 0 }}
+            title="Safe Water Map"
+          />
+        ) : (
+          <MapView
+            ref={mapRef}
+            style={StyleSheet.absoluteFillObject}
+            initialRegion={{
+              latitude: 25.8883,
+              longitude: 90.4932,
+              latitudeDelta: 0.1,
+              longitudeDelta: 0.1,
+            }}
+          >
+            <UrlTile
+              urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maximumZ={19}
+              flipY={false}
             />
-          )}
-        </MapView>
+            {sources.map(source => {
+              const isSafe = source.status === 'SAFE';
+              return (
+                <Marker
+                  key={source.id}
+                  coordinate={{ latitude: source.lat, longitude: source.lng }}
+                  onPress={() => setSelectedSource(source)}
+                >
+                  <View style={styles.markerContainer}>
+                    <View style={[
+                      styles.markerIcon,
+                      isSafe ? styles.markerSafe : styles.markerAlert,
+                      isSafe ? styles.hcBorder : styles.markerAlertBorder
+                    ]}>
+                      <MaterialIcons 
+                        name={isSafe ? "water-drop" : "warning"} 
+                        size={20} 
+                        color={isSafe ? colors.onTertiary : colors.onError} 
+                      />
+                    </View>
+                    <View style={[styles.markerLabel, isSafe ? styles.hcBorder : styles.markerAlertLabelBorder]}>
+                      <Text style={[styles.markerLabelText, isSafe ? { color: colors.primary } : { color: colors.error }]}>
+                        {source.name} - {isSafe ? 'Safe' : 'Contaminated'}
+                      </Text>
+                    </View>
+                  </View>
+                </Marker>
+              );
+            })}
+
+            {/* User Location Marker (Simulated fallback if no GPS) */}
+            <Marker coordinate={{ latitude: userLat, longitude: userLng }}>
+              <View style={styles.userLocationOuter}>
+                <View style={styles.userLocationInner} />
+              </View>
+            </Marker>
+
+            {/* Simulated Route Path if a source is selected */}
+            {selectedSource && (
+              <Polyline
+                coordinates={[
+                  { latitude: userLat, longitude: userLng },
+                  { latitude: selectedSource.lat, longitude: selectedSource.lng }
+                ]}
+                strokeColor={colors.secondary}
+                strokeWidth={4}
+                lineDashPattern={[8, 4]}
+              />
+            )}
+          </MapView>
+        )}
 
         {/* Legend & Quick Info */}
         <View style={styles.legendContainer}>
@@ -110,7 +180,19 @@ export default function SafeWaterMap() {
                 <Text style={styles.legendText}>Alert</Text>
               </View>
             </View>
-            <TouchableOpacity style={[styles.locationButton, styles.hcBorder]}>
+            <TouchableOpacity 
+              style={[styles.locationButton, styles.hcBorder]}
+              onPress={() => {
+                if (mapRef.current && location) {
+                  mapRef.current.animateToRegion({
+                    latitude: userLat,
+                    longitude: userLng,
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                  }, 500);
+                }
+              }}
+            >
               <MaterialIcons name="my-location" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
@@ -129,7 +211,7 @@ export default function SafeWaterMap() {
               <View style={styles.routingHeader}>
                 <View>
                   <Text style={styles.routingTitle}>{selectedSource.name}</Text>
-                  <Text style={styles.routingSubtitle}>{selectedSource.type.replace('_', ' ')}</Text>
+                  <Text style={styles.routingSubtitle}>{selectedSource.type?.replace('_', ' ') || 'WATER SOURCE'}</Text>
                 </View>
                 {selectedSource.status === 'SAFE' ? (
                   <View style={[styles.statusBadgeSafe, styles.hcBorder]}>
@@ -146,8 +228,8 @@ export default function SafeWaterMap() {
 
               <View style={styles.routingBody}>
                 <View style={styles.routingStats}>
-                  <Text style={styles.distanceText}>1.2<Text style={styles.distanceUnit}>km</Text></Text>
-                  <Text style={styles.timeText}>EST. 15 MIN WALK</Text>
+                  <Text style={styles.distanceText}>{dynamicDistance}<Text style={styles.distanceUnit}>km</Text></Text>
+                  <Text style={styles.timeText}>{dynamicTime}</Text>
                 </View>
                 <TouchableOpacity style={[styles.routeButton, styles.hcBorder, styles.hcShadow]}>
                   <MaterialIcons name="directions-walk" size={24} color={colors.onSecondary} />

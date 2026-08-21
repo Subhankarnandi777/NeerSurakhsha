@@ -1,6 +1,11 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 import { WaterSource } from '../types/source';
 import { HealthCase } from '../types/health';
+import { supabase } from '../lib/supabase';
+
+// Use secure local tunnel to bypass Windows Firewall and Android cleartext restrictions
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://10.0.2.2:8000/api/v1';
 
 interface AppState {
   userRole: string;
@@ -14,6 +19,7 @@ interface AppState {
   setUserName: (name: string) => void;
   setUserPhone: (phone: string) => void;
   addHealthCase: (healthCase: HealthCase) => void;
+  fetchSources: () => Promise<void>;
   syncData: () => Promise<void>;
 }
 
@@ -22,53 +28,88 @@ export const useAppStore = create<AppState>((set) => ({
   userName: 'Anjali Sharma',
   userPhone: '+91 98765 43210',
   villageName: 'Brahmapur Char',
-  sources: [
-    {
-      id: 'HP-007',
-      name: 'Primary Handpump 007',
-      type: 'Handpump',
-      status: 'HIGH_RISK',
-      distance: 120,
-      lat: 26.2,
-      lng: 91.7,
-      householdsUsing: 45,
-      lastTestResult: 'Positive',
-      groundwaterTrend: 'Rising',
-      healthCasesCount: 8,
-      riskExplanation: [
-        'H₂S test positive',
-        '8 diarrhoea cases reported',
-        'Groundwater level rising rapidly'
-      ],
-      recommendedAlternativeId: 'TW-001'
-    },
-    {
-      id: 'TW-001',
-      name: 'School Tubewell',
-      type: 'Tubewell',
-      status: 'SAFE',
-      distance: 450,
-      lat: 26.205,
-      lng: 91.708,
-      householdsUsing: 120,
-      lastTestResult: 'Negative',
-      groundwaterTrend: 'Stable',
-      healthCasesCount: 0,
-      riskExplanation: [],
-    }
-  ],
+  sources: [],
   healthCases: [],
-  pendingSyncCount: 6,
+  pendingSyncCount: 0,
   setUserRole: (role) => set({ userRole: role }),
   setUserName: (name) => set({ userName: name }),
   setUserPhone: (phone) => set({ userPhone: phone }),
-  addHealthCase: (newCase) => set((state) => ({ 
-    healthCases: [...state.healthCases, newCase],
-    pendingSyncCount: state.pendingSyncCount + 1
-  })),
+  addHealthCase: (newCase) => set((state) => {
+    const newCaseUnsynced = { ...newCase, synced: false };
+    return {
+      healthCases: [...state.healthCases, newCaseUnsynced],
+      pendingSyncCount: state.pendingSyncCount + 1
+    };
+  }),
+  fetchSources: async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: any = {
+        'Bypass-Tunnel-Reminder': 'true' // Required for localtunnel
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/sources/`, { headers });
+      if (!response.ok) {
+        console.error('Failed to fetch sources:', response.statusText);
+        // Fallback to empty array if error
+        set({ sources: [] });
+        return;
+      }
+      const data = await response.json();
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        set({ sources: data });
+      } else {
+        console.error('Invalid sources data format:', data);
+        set({ sources: [] });
+      }
+    } catch (error) {
+      console.error('Failed to fetch sources:', error);
+      set({ sources: [] });
+    }
+  },
   syncData: async () => {
-    // Simulate network request
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    set({ pendingSyncCount: 0 });
+    try {
+      // Get all unsynced health cases
+      const unsyncedCases = useAppStore.getState().healthCases.filter(c => !c.synced);
+      if (unsyncedCases.length === 0) return;
+
+      const payload = {
+        healthCases: unsyncedCases
+      };
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: any = { 
+        'Content-Type': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true' // Required for localtunnel
+      };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/sync/`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error('Sync failed');
+      const data = await response.json();
+
+      set((state) => ({
+        // Mark all sent cases as synced
+        healthCases: state.healthCases.map(c => 
+          unsyncedCases.find(uc => uc.id === c.id) ? { ...c, synced: true } : c
+        ),
+        // Update sources from backend
+        sources: data.updatedSources,
+        pendingSyncCount: 0
+      }));
+    } catch (error) {
+      console.error('Failed to sync data:', error);
+    }
   }
 }));

@@ -1,19 +1,63 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useWindowDimensions, TextInput, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState, useEffect } from 'react';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../../store/main.store';
 import { useRouter } from 'expo-router';
+import { supabase } from '../../lib/supabase';
 
 export default function Profile() {
-  const { userRole, userName, userPhone, villageName } = useAppStore();
+  const { userRole, userName, userPhone, villageName, setUserName, setUserPhone } = useAppStore();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(userName);
+  const [editPhone, setEditPhone] = useState(userPhone);
+  const [saving, setSaving] = useState(false);
+
+  // Sync state if store updates externally
+  useEffect(() => {
+    setEditName(userName);
+    setEditPhone(userPhone);
+  }, [userName, userPhone]);
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      // 1. Update Auth Metadata
+      const { data, error } = await supabase.auth.updateUser({
+        data: { full_name: editName }
+      });
+      if (error) throw error;
+      
+      // 2. Update Database Profile (if applicable, using auth user id)
+      const user = (await supabase.auth.getUser()).data.user;
+      if (user) {
+        await supabase.from('users').update({
+          name: editName,
+          phone: editPhone
+        }).eq('id', user.id);
+      }
+
+      // 3. Update Global Store
+      setUserName(editName);
+      setUserPhone(editPhone);
+      
+      setIsEditing(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleLogout = () => {
     // Navigate back to login
@@ -24,15 +68,28 @@ export default function Profile() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Account Profile</Text>
+        <TouchableOpacity onPress={() => setIsEditing(!isEditing)} style={styles.editIconBtn}>
+          <MaterialIcons name={isEditing ? "close" : "edit"} size={24} color={colors.primary} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={[styles.scrollContent, isTablet && { maxWidth: 600, alignSelf: 'center', width: '100%' }]} showsVerticalScrollIndicator={false}>
         {/* User Info Card */}
         <View style={styles.card}>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{userName.charAt(0)}</Text>
+            <Text style={styles.avatarText}>{userName.charAt(0).toUpperCase()}</Text>
           </View>
-          <Text style={styles.userName}>{userName}</Text>
+          {isEditing ? (
+            <TextInput 
+              style={styles.editInput} 
+              value={editName} 
+              onChangeText={setEditName} 
+              placeholder="Full Name" 
+              placeholderTextColor={colors.onSurfaceVariant}
+            />
+          ) : (
+            <Text style={styles.userName}>{userName}</Text>
+          )}
           <View style={styles.roleBadge}>
             <Text style={styles.roleText}>{userRole}</Text>
           </View>
@@ -45,8 +102,19 @@ export default function Profile() {
             <View style={styles.detailRow}>
               <MaterialIcons name="call" size={20} color={colors.onSurfaceVariant} />
               <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>Registered Mobile</Text>
-                <Text style={styles.detailValue}>{userPhone}</Text>
+                <Text style={styles.detailLabel}>Registered Mobile / Email</Text>
+                {isEditing ? (
+                  <TextInput 
+                    style={styles.editInputSmall} 
+                    value={editPhone} 
+                    onChangeText={setEditPhone} 
+                    placeholder="Phone/Email" 
+                    placeholderTextColor={colors.onSurfaceVariant}
+                    autoCapitalize="none"
+                  />
+                ) : (
+                  <Text style={styles.detailValue}>{userPhone}</Text>
+                )}
               </View>
             </View>
             <View style={styles.divider} />
@@ -75,6 +143,13 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
+        {isEditing && (
+          <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile} disabled={saving}>
+            <MaterialIcons name="save" size={24} color={colors.onPrimary} />
+            <Text style={styles.saveBtnText}>{saving ? 'SAVING...' : 'SAVE CHANGES'}</Text>
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <MaterialIcons name="logout" size={24} color={colors.error} />
           <Text style={styles.logoutBtnText}>LOG OUT</Text>
@@ -97,6 +172,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderBottomWidth: 2,
     borderBottomColor: 'rgba(22, 40, 57, 0.1)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerTitle: {
     ...typography.h2,
@@ -224,5 +302,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 1,
     color: colors.error,
+  },
+  editIconBtn: {
+    padding: 8,
+  },
+  editInput: {
+    ...typography.h2,
+    fontSize: 24,
+    color: colors.onSurface,
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.primary,
+    textAlign: 'center',
+    minWidth: 200,
+    paddingVertical: 4,
+  },
+  editInputSmall: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 16,
+    color: colors.onSurface,
+    marginTop: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.primary,
+    paddingVertical: 4,
+  },
+  saveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: 8,
+    gap: 8,
+    marginTop: 8,
+  },
+  saveBtnText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 16,
+    letterSpacing: 1,
+    color: colors.onPrimary,
   }
 });

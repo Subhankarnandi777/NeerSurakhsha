@@ -14,12 +14,13 @@ const SYMPTOMS = [
 
 export default function HealthReport() {
   const router = useRouter();
-  const { villageName, addHealthCase } = useAppStore();
-
+  const { villageName, addHealthCase, sources } = useAppStore();
+  
   const [householdId, setHouseholdId] = useState('');
   const [patientName, setPatientName] = useState('');
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
-  const [sourceId, setSourceId] = useState('HP-007');
+  // Automatically select the first real source ID from the database to prevent Foreign Key errors
+  const [sourceId, setSourceId] = useState(sources.length > 0 ? sources[0].id : '');
 
   const toggleSymptom = (s: string) => {
     setSelectedSymptoms(prev => 
@@ -116,7 +117,7 @@ export default function HealthReport() {
               onPress={() => router.push('/health-report/select-source')}
             >
               <MaterialIcons name="water" size={24} color={colors.primary} />
-              <Text style={styles.sourceName}>{sourceId}</Text>
+              <Text style={styles.sourceName}>{sources.find(s => s.id === sourceId)?.name || 'Select Source'}</Text>
               <MaterialIcons name="chevron-right" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>

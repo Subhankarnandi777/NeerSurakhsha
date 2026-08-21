@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, spacing, radius } from '../../theme';
@@ -12,7 +12,7 @@ import { Button } from '../../components/ui/Button';
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { sources } = useAppStore();
+  const { sources, fetchSources } = useAppStore();
   const [sourceId, setSourceId] = useState('');
   const [testResult, setTestResult] = useState<'SAFE' | 'UNSAFE' | null>(null);
 
@@ -20,6 +20,10 @@ export default function Home() {
   const isTablet = width >= 768;
 
   const highRiskSources = sources.filter(s => s.status === 'HIGH_RISK').length;
+
+  useEffect(() => {
+    fetchSources();
+  }, []);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>

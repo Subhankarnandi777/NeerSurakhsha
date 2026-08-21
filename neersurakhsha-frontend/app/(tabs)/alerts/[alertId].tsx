@@ -14,14 +14,14 @@ export default function AlertDetails() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
         </TouchableOpacity>
         <Text style={styles.title}>Alert Details</Text>
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.hero}>
-          <Ionicons name="warning" size={48} color={colors.status.danger} />
+          <Ionicons name="warning" size={48} color={colors.error} />
           <Text style={styles.heroTitle}>HIGH RISK ALERT</Text>
           <Text style={styles.heroSubtitle}>Water Source: HP-007</Text>
         </View>
@@ -30,15 +30,15 @@ export default function AlertDetails() {
           <Text style={styles.sectionTitle}>WHY?</Text>
           <View style={styles.reasonList}>
             <View style={styles.reasonItem}>
-              <Ionicons name="checkmark-circle" size={20} color={colors.status.danger} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.error} />
               <Text style={styles.reasonText}>8 diarrhoea cases reported today</Text>
             </View>
             <View style={styles.reasonItem}>
-              <Ionicons name="checkmark-circle" size={20} color={colors.status.danger} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.error} />
               <Text style={styles.reasonText}>H₂S contamination tested positive</Text>
             </View>
             <View style={styles.reasonItem}>
-              <Ionicons name="checkmark-circle" size={20} color={colors.status.danger} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.error} />
               <Text style={styles.reasonText}>Rapid groundwater rise detected</Text>
             </View>
           </View>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.outlineVariant,
   },
   backBtn: {
     padding: 4,
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.title,
-    color: colors.text,
+    color: colors.onSurface,
   },
   content: {
     padding: 20,
@@ -95,12 +95,12 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     ...typography.header,
-    color: colors.status.danger,
+    color: colors.error,
     marginTop: 12,
   },
   heroSubtitle: {
     ...typography.subtitle,
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     marginTop: 4,
   },
   card: {
@@ -108,12 +108,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.outlineVariant,
     marginBottom: 16,
   },
   sectionTitle: {
     ...typography.subtitle,
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     marginBottom: 16,
   },
   reasonList: {
@@ -126,21 +126,21 @@ const styles = StyleSheet.create({
   },
   reasonText: {
     ...typography.body,
-    color: colors.text,
+    color: colors.onSurface,
   },
   actionList: {
     gap: 12,
   },
   actionItem: {
     ...typography.body,
-    color: colors.text,
+    color: colors.onSurface,
     fontWeight: '500',
   },
   footer: {
     padding: 20,
     backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.outlineVariant,
   },
   ackBtn: {
     backgroundColor: colors.primary,
