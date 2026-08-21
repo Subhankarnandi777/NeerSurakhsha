@@ -1,0 +1,326 @@
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, useWindowDimensions } from 'react-native';
+import { useRouter } from 'expo-router';
+import { colors, spacing, radius } from '../../theme';
+import { useAppStore } from '../../store/main.store';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text } from '../../components/ui/Text';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+
+export default function Home() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { sources } = useAppStore();
+  const [sourceId, setSourceId] = useState('');
+  const [testResult, setTestResult] = useState<'SAFE' | 'UNSAFE' | null>(null);
+
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
+  const highRiskSources = sources.filter(s => s.status === 'HIGH_RISK').length;
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTitleRow}>
+          <MaterialIcons name="emergency" size={24} color={colors.primary} />
+          <Text variant="header" style={styles.headerTitleText}>NEERSURAKSHA</Text>
+        </View>
+        <TouchableOpacity style={styles.callHelpBtn} activeOpacity={0.8}>
+          <Text variant="caption" style={styles.callHelpText}>CALL FOR HELP</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Page Title */}
+        <View style={styles.titleSection}>
+          <Text variant="header" color="primary">Field Dashboard</Text>
+          <Text variant="body" color="onSurfaceVariant">মাঠৰ ডেশ্ববৰ্ড</Text>
+        </View>
+
+        {/* Primary Action Button */}
+        <View style={styles.primaryActionSection}>
+          <Button 
+            variant="terracotta" 
+            size="lg"
+            title="REPORT NEW CASE"
+            icon={<MaterialIcons name="add-alert" size={32} color={colors.onSecondaryContainer} />}
+            onPress={() => router.push('/health-report')}
+          />
+          <Text variant="body" color="onSurfaceVariant" style={styles.primaryActionSub}>
+            নতুন গোচৰ দাখিল কৰক
+          </Text>
+        </View>
+
+        {/* Visual Summary Grid */}
+        <View style={styles.grid}>
+          {/* Card 1: New Cases */}
+          <Card variant="rugged" style={[styles.gridCard, isTablet && { width: '31%' }]}>
+            <View style={styles.cardHeader}>
+              <Text variant="caption" color="onSurfaceVariant">NEW CASES</Text>
+              <MaterialIcons name="medical-services" size={20} color="rgba(22, 40, 57, 0.5)" />
+            </View>
+            <View style={styles.cardMetrics}>
+              <Text style={styles.metricBig} color="primary">12</Text>
+              <Text variant="body" color="onSurfaceVariant">This Week</Text>
+            </View>
+          </Card>
+
+          {/* Card 2: Wells Tested */}
+          <Card variant="rugged" style={[styles.gridCard, isTablet && { width: '31%' }]}>
+            <View style={styles.cardHeader}>
+              <Text variant="caption" color="onSurfaceVariant">WELLS TESTED</Text>
+              <MaterialIcons name="water-drop" size={20} color="rgba(22, 40, 57, 0.5)" />
+            </View>
+            <View style={styles.cardMetrics}>
+              <Text style={styles.metricBig} color="primary">48</Text>
+              <Text variant="body" color="onSurfaceVariant">This Month</Text>
+            </View>
+          </Card>
+
+          {/* Card 3: Critical Sources */}
+          <Card variant="alert" style={[styles.gridCard, isTablet && { width: '31%' }]}>
+            <View style={styles.cardHeader}>
+              <Text variant="caption" color="secondaryContainer">CRITICAL SOURCES</Text>
+              <MaterialIcons name="warning" size={20} color={colors.secondaryContainer} />
+            </View>
+            <View style={styles.cardMetrics}>
+              <Text style={[styles.metricBig, { color: colors.secondaryContainer }]}>{highRiskSources}</Text>
+              <Text variant="body" color="onSurfaceVariant">Require Action</Text>
+            </View>
+          </Card>
+        </View>
+
+        {/* H2S Vial Test Entry */}
+        <View style={styles.testEntrySection}>
+          <View style={styles.testEntryHeader}>
+            <Text variant="title" color="primary" style={styles.testEntryTitle}>H2S Vial Test Entry</Text>
+            <Text variant="body" color="onSurfaceVariant">H2S ভাইল পৰীক্ষাৰ ফলাফল</Text>
+          </View>
+          
+          <Card variant="rugged" style={[styles.testEntryCard, isTablet && { maxWidth: 600, alignSelf: 'center', width: '100%' }]}>
+            {/* Source ID Input */}
+            <View style={styles.inputGroup}>
+              <Text variant="caption" color="primary" style={{ marginBottom: 8 }}>Source ID (উৎস ID)</Text>
+              <TextInput 
+                style={styles.textInput}
+                placeholder="e.g. W-1234"
+                placeholderTextColor={colors.outline}
+                value={sourceId}
+                onChangeText={setSourceId}
+              />
+            </View>
+
+            {/* Test Result Binary Selection */}
+            <View style={styles.inputGroup}>
+              <Text variant="caption" color="primary" style={{ marginBottom: 8 }}>Test Result (পৰীক্ষাৰ ফলাফল)</Text>
+              <View style={styles.binarySelection}>
+                <TouchableOpacity 
+                  style={[
+                    styles.binaryBtn, 
+                    testResult === 'SAFE' ? styles.binaryBtnSafeActive : null
+                  ]}
+                  onPress={() => setTestResult('SAFE')}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="check-circle" size={28} color={testResult === 'SAFE' ? colors.primary : colors.tertiaryContainer} />
+                  <Text variant="caption" style={{ color: testResult === 'SAFE' ? colors.primary : colors.tertiaryContainer, marginTop: 4 }}>SAFE (সুৰক্ষিত)</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[
+                    styles.binaryBtn, 
+                    testResult === 'UNSAFE' ? styles.binaryBtnUnsafeActive : null
+                  ]}
+                  onPress={() => setTestResult('UNSAFE')}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="cancel" size={28} color={testResult === 'UNSAFE' ? colors.error : colors.error} />
+                  <Text variant="caption" style={{ color: colors.error, marginTop: 4 }}>UNSAFE (অসুৰক্ষিত)</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {testResult && sourceId && (
+              <Button 
+                title="SUBMIT TEST" 
+                variant="primary" 
+                style={{ marginTop: spacing.md }}
+                onPress={() => {
+                  // Connect to the store or API here
+                  setSourceId('');
+                  setTestResult(null);
+                }}
+              />
+            )}
+          </Card>
+        </View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+
+      {/* Voice Trigger FAB */}
+      <View style={styles.fabContainer}>
+        <TouchableOpacity style={styles.voiceFab} activeOpacity={0.8}>
+          <MaterialIcons name="mic" size={32} color={colors.onSecondaryContainer} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.surface,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.edgeMargin,
+    height: 56,
+    borderBottomWidth: 2,
+    borderBottomColor: 'rgba(22, 40, 57, 0.1)',
+    backgroundColor: colors.surface,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerTitleText: {
+    fontSize: 22,
+    color: colors.primary,
+    letterSpacing: -0.5,
+  },
+  callHelpBtn: {
+    backgroundColor: colors.errorContainer,
+    paddingHorizontal: 16,
+    height: 40,
+    justifyContent: 'center',
+    borderRadius: radius.md,
+  },
+  callHelpText: {
+    color: colors.onErrorContainer,
+  },
+  scrollContent: {
+    paddingHorizontal: spacing.edgeMargin,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+  titleSection: {
+    gap: 4,
+    marginBottom: spacing.lg,
+  },
+  primaryActionSection: {
+    marginBottom: spacing.xl,
+  },
+  primaryActionSub: {
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  gridCard: {
+    width: '100%',
+    minHeight: 140,
+    justifyContent: 'space-between',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  cardMetrics: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+  },
+  metricBig: {
+    fontFamily: 'Montserrat',
+    fontSize: 48,
+    fontWeight: '800',
+    lineHeight: 52,
+  },
+  testEntrySection: {
+    marginBottom: spacing.lg,
+  },
+  testEntryHeader: {
+    marginBottom: spacing.md,
+    gap: 4,
+  },
+  testEntryTitle: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(22, 40, 57, 0.1)',
+    paddingBottom: 8,
+  },
+  testEntryCard: {
+    padding: spacing.lg,
+    gap: spacing.lg,
+  },
+  inputGroup: {
+    flexDirection: 'column',
+  },
+  textInput: {
+    height: 56,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.md,
+    paddingHorizontal: 16,
+    fontFamily: 'Inter',
+    fontSize: 18,
+    color: colors.onSurface,
+  },
+  binarySelection: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  binaryBtn: {
+    flex: 1,
+    height: 72,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    borderRadius: radius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  binaryBtnSafeActive: {
+    backgroundColor: colors.surfaceContainer,
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  binaryBtnUnsafeActive: {
+    backgroundColor: colors.errorContainer,
+    borderColor: colors.error,
+    borderWidth: 2,
+  },
+  fabContainer: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 64,
+    height: 64,
+  },
+  voiceFab: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.secondaryContainer,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  }
+});
