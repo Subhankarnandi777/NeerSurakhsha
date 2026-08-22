@@ -5,12 +5,24 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "NeerSurakhsha API"
     API_V1_STR: str = "/api/v1"
     
+    DEBUG: bool = False
+    
     # DATABASE
     DATABASE_URL: str = "sqlite:///./neersurakhsha.db"
     
     # SECURITY
-    SECRET_KEY: str = "super-secret-key-change-me"
+    SECRET_KEY: Optional[str] = None
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
+    
+    # CORS
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8081"]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.DEBUG and (not self.SECRET_KEY or self.SECRET_KEY == "change-me"):
+            raise ValueError("SECRET_KEY must be set in non-debug mode.")
+        if self.DEBUG and not self.SECRET_KEY:
+            self.SECRET_KEY = "super-secret-key-change-me"
     
     class Config:
         env_file = ".env"

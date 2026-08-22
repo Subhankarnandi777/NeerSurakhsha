@@ -4,8 +4,12 @@ import { WaterSource } from '../types/source';
 import { HealthCase } from '../types/health';
 import { supabase } from '../lib/supabase';
 
-// Use secure local tunnel to bypass Windows Firewall and Android cleartext restrictions
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://fresh-buckets-roll.loca.lt/api/v1';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  console.error("FATAL ERROR: EXPO_PUBLIC_API_BASE_URL is not set in environment variables!");
+  // In a real app we might show an alert or splash screen error here.
+}
 
 interface AppState {
   userRole: string;
@@ -24,6 +28,8 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
+  // PROTOTYPE SEED DATA: Hardcoded default user for demonstration purposes
+  // In production, these should be initialized empty and populated via login response.
   userRole: 'ASHA Worker',
   userName: 'Anjali Sharma',
   userPhone: '+91 98765 43210',
@@ -44,9 +50,7 @@ export const useAppStore = create<AppState>((set) => ({
   fetchSources: async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const headers: any = {
-        'Bypass-Tunnel-Reminder': 'true' // Required for localtunnel
-      };
+      const headers: any = {};
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
@@ -83,8 +87,7 @@ export const useAppStore = create<AppState>((set) => ({
 
       const { data: { session } } = await supabase.auth.getSession();
       const headers: any = { 
-        'Content-Type': 'application/json',
-        'Bypass-Tunnel-Reminder': 'true' // Required for localtunnel
+        'Content-Type': 'application/json'
       };
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;

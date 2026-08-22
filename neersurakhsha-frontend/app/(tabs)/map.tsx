@@ -1,63 +1,42 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
+import { WebView } from 'react-native-webview';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useAppStore } from '../../store/main.store';
 import { useRouter } from 'expo-router';
-import { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
+import { useNetwork } from '../../hooks/useNetwork';
 
 const { width } = Dimensions.get('window');
 
 export default function SafeWaterMap() {
   const { sources } = useAppStore();
   const router = useRouter();
-
-  // Selected source for the routing card
+  const isOnline = useNetwork();
+  
   const [selectedSource, setSelectedSource] = useState(sources.length > 0 ? sources[0] : null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const mapRef = useRef<MapView>(null);
-
+  
   const insets = useSafeAreaInsets();
+  const webviewRef = useRef<WebView>(null);
 
   // Update selected source when sources arrive if it's null
   useEffect(() => {
     if (sources.length > 0 && !selectedSource) {
       setSelectedSource(sources[0]);
-
-      // Also fit the map to show all these new sources so they aren't off-screen!
-      if (mapRef.current) {
-        mapRef.current.fitToCoordinates(
-          sources.map(s => ({ latitude: s.lat, longitude: s.lng })),
-          { edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }, animated: true }
-        );
-      }
     }
   }, [sources]);
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.warn('Permission to access location was denied');
-        return;
-      }
-
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc);
-
-      // Only animate to user if we don't have sources yet, 
-      // otherwise the sources useEffect will handle bounding the map
-      if (mapRef.current && sources.length === 0) {
-        mapRef.current.animateToRegion({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }, 1000);
+      if (status === 'granted') {
+        let loc = await Location.getCurrentPositionAsync({});
+        setLocation(loc);
       }
     })();
   }, []);
@@ -65,6 +44,7 @@ export default function SafeWaterMap() {
   const userLat = location?.coords.latitude || 25.8883;
   const userLng = location?.coords.longitude || 90.4932;
 
+  // Simple Haversine distance
   const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -76,6 +56,76 @@ export default function SafeWaterMap() {
 
   const dynamicDistance = location && selectedSource ? getDistance(userLat, userLng, selectedSource.lat, selectedSource.lng) : '1.2';
   const dynamicTime = location && selectedSource ? `EST. ${Math.round(parseFloat(dynamicDistance) * 12)} MIN WALK` : 'EST. 15 MIN WALK';
+
+  const leafletHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <style>
+        body { padding: 0; margin: 0; }
+        html, body, #map { height: 100%; width: 100vw; }
+        .custom-marker {
+          background-color: white;
+          border: 2px solid #fc7127;
+          border-radius: 50%;
+          text-align: center;
+          line-height: 24px;
+          font-weight: bold;
+          font-family: sans-serif;
+          color: white;
+        }
+        .marker-safe { background-color: #2e7d32; border-color: #1b5e20; }
+        .marker-alert { background-color: #d32f2f; border-color: #b71c1c; }
+      </style>
+    </head>
+    <body>
+      <div id="map"></div>
+      <script>
+        const map = L.map('map', { zoomControl: false }).setView([${userLat}, ${userLng}], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // User location
+        L.circleMarker([${userLat}, ${userLng}], {
+          color: '#fc7127',
+          fillColor: '#fc7127',
+          fillOpacity: 0.8,
+          radius: 8
+        }).addTo(map);
+
+        const sources = ${JSON.stringify(sources || [])};
+        
+        sources.forEach(source => {
+          const isSafe = source.status === 'SAFE';
+          const className = isSafe ? 'custom-marker marker-safe' : 'custom-marker marker-alert';
+          
+          const icon = L.divIcon({
+            className: className,
+            iconSize: [24, 24],
+            html: isSafe ? '✓' : '!'
+          });
+          
+          const marker = L.marker([source.lat, source.lng], { icon }).addTo(map);
+          
+          marker.on('click', () => {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'markerClick', sourceId: source.id }));
+          });
+        });
+        
+        if (sources.length > 0) {
+          const group = new L.featureGroup(sources.map(s => L.marker([s.lat, s.lng])));
+          map.fitBounds(group.getBounds(), { padding: [50, 50] });
+        }
+      </script>
+    </body>
+    </html>
+  `;
 
   return (
     <View style={[styles.safeArea, { paddingTop: insets.top }]}>
@@ -93,72 +143,23 @@ export default function SafeWaterMap() {
       </View>
 
       <View style={styles.mapContainer}>
-        <MapView
-          ref={mapRef}
+        <WebView
+          ref={webviewRef}
+          source={{ html: leafletHTML }}
           style={StyleSheet.absoluteFillObject}
-          initialRegion={{
-            latitude: 25.8883,
-            longitude: 90.4932,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
+          onMessage={(event) => {
+            try {
+              const data = JSON.parse(event.nativeEvent.data);
+              if (data.type === 'markerClick') {
+                const src = sources.find(s => s.id === data.sourceId);
+                if (src) setSelectedSource(src);
+              }
+            } catch (e) {}
           }}
-        >
-          <UrlTile
-            urlTemplate="https://a.tile.openstreetmap.de/{z}/{x}/{y}.png"
-            maximumZ={19}
-            flipY={false}
-          />
-          {sources.map(source => {
-            const isSafe = source.status === 'SAFE';
-            return (
-              <Marker
-                key={source.id}
-                coordinate={{ latitude: source.lat, longitude: source.lng }}
-                onPress={() => setSelectedSource(source)}
-              >
-                <View style={styles.markerContainer}>
-                  <View style={[
-                    styles.markerIcon,
-                    isSafe ? styles.markerSafe : styles.markerAlert,
-                    isSafe ? styles.hcBorder : styles.markerAlertBorder
-                  ]}>
-                    <MaterialIcons 
-                      name={isSafe ? "water-drop" : "warning"} 
-                      size={20} 
-                      color={isSafe ? colors.onTertiary : colors.onError} 
-                    />
-                  </View>
-                  <View style={[styles.markerLabel, isSafe ? styles.hcBorder : styles.markerAlertLabelBorder]}>
-                    <Text style={[styles.markerLabelText, isSafe ? { color: colors.primary } : { color: colors.error }]}>
-                      {source.name} - {isSafe ? 'Safe' : 'Contaminated'}
-                    </Text>
-                  </View>
-                </View>
-              </Marker>
-            );
-          })}
-
-          {/* User Location Marker (Simulated fallback if no GPS) */}
-          <Marker coordinate={{ latitude: userLat, longitude: userLng }}>
-            <View style={styles.userLocationOuter}>
-              <View style={styles.userLocationInner} />
-            </View>
-          </Marker>
-
-          {/* Simulated Route Path if a source is selected */}
-          {selectedSource && (
-            <Polyline
-              coordinates={[
-                { latitude: userLat, longitude: userLng },
-                { latitude: selectedSource.lat, longitude: selectedSource.lng }
-              ]}
-              strokeColor={colors.secondary}
-              strokeWidth={4}
-              lineDashPattern={[8, 4]}
-            />
-          )}
-        </MapView>
-      </View>
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          originWhitelist={['*']}
+        />
 
         {/* Legend & Quick Info */}
         <View style={styles.legendContainer}>
@@ -173,21 +174,6 @@ export default function SafeWaterMap() {
                 <Text style={styles.legendText}>Alert</Text>
               </View>
             </View>
-            <TouchableOpacity
-              style={[styles.locationButton, styles.hcBorder]}
-              onPress={() => {
-                if (mapRef.current && location) {
-                  mapRef.current.animateToRegion({
-                    latitude: userLat,
-                    longitude: userLng,
-                    latitudeDelta: 0.05,
-                    longitudeDelta: 0.05,
-                  }, 500);
-                }
-              }}
-            >
-              <MaterialIcons name="my-location" size={24} color={colors.primary} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -224,7 +210,18 @@ export default function SafeWaterMap() {
                   <Text style={styles.distanceText}>{dynamicDistance}<Text style={styles.distanceUnit}>km</Text></Text>
                   <Text style={styles.timeText}>{dynamicTime}</Text>
                 </View>
-                <TouchableOpacity style={[styles.routeButton, styles.hcBorder, styles.hcShadow]}>
+                <TouchableOpacity 
+                  style={[styles.routeButton, styles.hcBorder, styles.hcShadow]}
+                  onPress={() => {
+                    if (!isOnline) {
+                      alert("Routing is unavailable while offline. Please use the straight-line distance estimate.");
+                    } else {
+                      const url = "https://www.google.com/maps/dir/?api=1&destination=" + selectedSource.lat + "," + selectedSource.lng;
+                      const { Linking } = require('react-native'); // trigger reload
+                      Linking.openURL(url);
+                    }
+                  }}
+                >
                   <MaterialIcons name="directions-walk" size={24} color={colors.onSecondary} />
                   <Text style={styles.routeButtonText}>START ROUTE</Text>
                 </TouchableOpacity>
@@ -233,6 +230,7 @@ export default function SafeWaterMap() {
           </View>
         )}
       </View>
+    </View>
   );
 }
 
@@ -283,10 +281,6 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
   hcBorder: {
     borderWidth: 2,
     borderColor: colors.primary,
@@ -297,61 +291,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-  },
-  markerContainer: {
-    alignItems: 'center',
-  },
-  markerIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  markerSafe: {
-    backgroundColor: colors.tertiary,
-  },
-  markerAlert: {
-    backgroundColor: colors.error,
-  },
-  markerAlertBorder: {
-    borderWidth: 2,
-    borderColor: colors.errorContainer,
-    shadowColor: colors.error,
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 5,
-  },
-  markerLabel: {
-    backgroundColor: colors.surface,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 2,
-  },
-  markerAlertLabelBorder: {
-    borderWidth: 2,
-    borderColor: colors.error,
-  },
-  markerLabelText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 12,
-  },
-  userLocationOuter: {
-    width: 24,
-    height: 24,
-    backgroundColor: 'rgba(252, 113, 39, 0.3)',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.surface,
-  },
-  userLocationInner: {
-    width: 8,
-    height: 8,
-    backgroundColor: colors.secondary,
-    borderRadius: 4,
   },
   legendContainer: {
     position: 'absolute',
@@ -395,11 +334,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     fontSize: 14,
     color: colors.onSurfaceVariant,
-  },
-  locationButton: {
-    backgroundColor: colors.surfaceContainer,
-    padding: 8,
-    borderRadius: 6,
   },
   fabContainer: {
     position: 'absolute',
@@ -516,175 +450,3 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 });
-
-// A slightly muted map style for civic clarity
-const mapStyle = [
-  {
-    "featureType": "all",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "weight": "2.00"
-      }
-    ]
-  },
-  {
-    "featureType": "all",
-    "elementType": "geometry.stroke",
-    "stylers": [
-      {
-        "color": "#9c9c9c"
-      }
-    ]
-  },
-  {
-    "featureType": "all",
-    "elementType": "labels.text",
-    "stylers": [
-      {
-        "visibility": "on"
-      }
-    ]
-  },
-  {
-    "featureType": "landscape",
-    "elementType": "all",
-    "stylers": [
-      {
-        "color": "#f2f2f2"
-      }
-    ]
-  },
-  {
-    "featureType": "landscape",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#ffffff"
-      }
-    ]
-  },
-  {
-    "featureType": "landscape.man_made",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#ffffff"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "all",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "all",
-    "stylers": [
-      {
-        "saturation": -100
-      },
-      {
-        "lightness": 45
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#eeeeee"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#7b7b7b"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#ffffff"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "all",
-    "stylers": [
-      {
-        "visibility": "simplified"
-      }
-    ]
-  },
-  {
-    "featureType": "road.arterial",
-    "elementType": "labels.icon",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "transit",
-    "elementType": "all",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "all",
-    "stylers": [
-      {
-        "color": "#46bcec"
-      },
-      {
-        "visibility": "on"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#c8d7d4"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#070707"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#ffffff"
-      }
-    ]
-  }
-];

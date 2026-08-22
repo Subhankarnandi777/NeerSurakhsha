@@ -41,15 +41,11 @@ def sync_data(
             )
             db.add(new_case)
             
-            # Increment healthCasesCount in the corresponding WaterSource
+            # Increment healthCasesCount in the corresponding WaterSource and recompute
             source = db.query(WaterSource).filter(WaterSource.id == hc.sourceId).first()
             if source:
-                source.healthCasesCount += 1
-                if source.healthCasesCount >= 3 and source.status == 'SAFE':
-                    source.status = 'HIGH_RISK'
-                    if not source.riskExplanation:
-                        source.riskExplanation = []
-                    source.riskExplanation.append(f"Multiple recent health cases reported.")
+                from app.engines.decision_engine import recompute_source_status
+                recompute_source_status(db, source, new_case)
             synced_count += 1
             
     db.commit()
