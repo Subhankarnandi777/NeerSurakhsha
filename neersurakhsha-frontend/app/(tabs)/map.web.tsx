@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme/spacing';
@@ -17,9 +16,9 @@ export default function SafeWaterMap() {
   const router = useRouter();
 
   // Selected source for the routing card
-  const [selectedSource, setSelectedSource] = useState(sources.length > 0 ? sources[0] : null);
+  const [selectedSource, setSelectedSource] = useState<any>(sources.length > 0 ? sources[0] : null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
 
   const insets = useSafeAreaInsets();
 
@@ -29,9 +28,9 @@ export default function SafeWaterMap() {
       setSelectedSource(sources[0]);
 
       // Also fit the map to show all these new sources so they aren't off-screen!
-      if (mapRef.current) {
+      if (mapRef.current && mapRef.current.fitToCoordinates) {
         mapRef.current.fitToCoordinates(
-          sources.map(s => ({ latitude: s.lat, longitude: s.lng })),
+          sources.map((s: any) => ({ latitude: s.lat, longitude: s.lng })),
           { edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }, animated: true }
         );
       }
@@ -93,71 +92,11 @@ export default function SafeWaterMap() {
       </View>
 
       <View style={styles.mapContainer}>
-        <MapView
-          ref={mapRef}
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={{
-            latitude: 25.8883,
-            longitude: 90.4932,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          }}
-        >
-          <UrlTile
-            urlTemplate="https://a.tile.openstreetmap.de/{z}/{x}/{y}.png"
-            maximumZ={19}
-            flipY={false}
-          />
-          {sources.map(source => {
-            const isSafe = source.status === 'SAFE';
-            return (
-              <Marker
-                key={source.id}
-                coordinate={{ latitude: source.lat, longitude: source.lng }}
-                onPress={() => setSelectedSource(source)}
-              >
-                <View style={styles.markerContainer}>
-                  <View style={[
-                    styles.markerIcon,
-                    isSafe ? styles.markerSafe : styles.markerAlert,
-                    isSafe ? styles.hcBorder : styles.markerAlertBorder
-                  ]}>
-                    <MaterialIcons 
-                      name={isSafe ? "water-drop" : "warning"} 
-                      size={20} 
-                      color={isSafe ? colors.onTertiary : colors.onError} 
-                    />
-                  </View>
-                  <View style={[styles.markerLabel, isSafe ? styles.hcBorder : styles.markerAlertLabelBorder]}>
-                    <Text style={[styles.markerLabelText, isSafe ? { color: colors.primary } : { color: colors.error }]}>
-                      {source.name} - {isSafe ? 'Safe' : 'Contaminated'}
-                    </Text>
-                  </View>
-                </View>
-              </Marker>
-            );
-          })}
-
-          {/* User Location Marker (Simulated fallback if no GPS) */}
-          <Marker coordinate={{ latitude: userLat, longitude: userLng }}>
-            <View style={styles.userLocationOuter}>
-              <View style={styles.userLocationInner} />
-            </View>
-          </Marker>
-
-          {/* Simulated Route Path if a source is selected */}
-          {selectedSource && (
-            <Polyline
-              coordinates={[
-                { latitude: userLat, longitude: userLng },
-                { latitude: selectedSource.lat, longitude: selectedSource.lng }
-              ]}
-              strokeColor={colors.secondary}
-              strokeWidth={4}
-              lineDashPattern={[8, 4]}
-            />
-          )}
-        </MapView>
+        <iframe 
+          src={`https://www.openstreetmap.org/export/embed.html?bbox=${userLng-0.1},${userLat-0.1},${userLng+0.1},${userLat+0.1}&layer=mapnik&marker=${userLat},${userLng}`}
+          style={{ width: '100%', height: '100%', border: 0 }}
+          title="Safe Water Map"
+        />
       </View>
 
         {/* Legend & Quick Info */}

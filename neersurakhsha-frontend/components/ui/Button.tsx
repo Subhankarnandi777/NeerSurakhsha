@@ -63,7 +63,7 @@ export function Button({ title, variant = 'primary', size = 'md', icon, loading,
             minHeight,
             width: size === 'icon' ? minHeight : undefined,
             paddingHorizontal: size === 'icon' ? 0 : spacing.lg,
-            borderRadius: size === 'icon' ? 9999 : radius.default,
+            borderRadius: size === 'icon' ? 9999 : radius.md,
           },
         ]}
         disabled={disabled || loading}

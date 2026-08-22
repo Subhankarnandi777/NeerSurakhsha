@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
-import { spacing, rounded, elevation } from '../theme/spacing';
+import { spacing, radius, elevation } from '../theme/spacing';
 import { useAppStore } from '../store/main.store';
 import { useRouter } from 'expo-router';
 
@@ -13,7 +13,7 @@ export default function MapViewComponent() {
   const getMarkerColor = (status: string) => {
     switch(status) {
       case 'SAFE': return colors.status.safe;
-      case 'CONTAMINATION_RISK': return colors.status.risk;
+      case 'CONTAMINATION_RISK': return colors.status.warning;
       case 'AVAILABILITY_RISK': return colors.status.warning;
       case 'HIGH_RISK': return colors.status.danger;
       default: return colors.primary;
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 140,
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: rounded.default,
+    borderRadius: radius.default,
   },
   calloutTitle: {
     ...typography.subtitle,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     right: spacing.edgeMargin,
     backgroundColor: colors.surfaceContainerLowest,
     padding: spacing.md,
-    borderRadius: rounded.lg,
+    borderRadius: radius.lg,
     flexDirection: 'row',
     justifyContent: 'space-around',
     shadowColor: colors.outline,
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   dot: {
     width: 12,
     height: 12,
-    borderRadius: rounded.full,
+    borderRadius: radius.full,
   },
   legendText: {
     ...typography.body,

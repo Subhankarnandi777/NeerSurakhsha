@@ -21,8 +21,8 @@ export default function Welcome() {
           <Text style={styles.brandText}>NEERSURAKSHA</Text>
         </View>
         {isDesktop && (
-          <TouchableOpacity style={[styles.primaryBtn, { paddingVertical: 8, paddingHorizontal: 16, marginTop: 0 }]}>
-            <Text style={styles.primaryBtnText}>CALL FOR HELP</Text>
+          <TouchableOpacity style={[styles.actionBtn, { paddingVertical: 8, paddingHorizontal: 16, marginTop: 0 }]}>
+            <Text style={styles.actionBtnText}>CALL FOR HELP</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     borderColor: colors.outlineVariant,
   },
   actionBtnText: {
-    ...typography.button,
+    ...typography.caption,
     fontSize: 16,
     color: colors.onPrimary,
   },

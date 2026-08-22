@@ -14,7 +14,7 @@ const SYMPTOMS = [
 
 export default function HealthReport() {
   const router = useRouter();
-  const { villageName, addHealthCase, sources } = useAppStore();
+  const { villageName, addHealthCase, sources, syncData } = useAppStore();
   
   const [householdId, setHouseholdId] = useState('');
   const [patientName, setPatientName] = useState('');
@@ -44,6 +44,10 @@ export default function HealthReport() {
       synced: false
     };
     addHealthCase(newCase);
+    
+    // Automatically attempt to sync to DB immediately
+    syncData().catch(e => console.error('Auto-sync failed:', e));
+    
     router.replace('/(tabs)/home');
   };
 

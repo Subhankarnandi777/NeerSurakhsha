@@ -21,13 +21,13 @@ const styles = StyleSheet.create({
   },
   text: {
     ...typography.title,
-    color: colors.text,
+    color: colors.onSurface,
     textAlign: 'center',
     marginBottom: 12,
   },
   subtext: {
     ...typography.body,
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
     textAlign: 'center',
   }
 });
