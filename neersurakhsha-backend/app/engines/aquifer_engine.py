@@ -19,7 +19,7 @@ WHAT IS NEW IN v2
 
 2. CALIBRATED UNCERTAINTY
    Every forecast carries a prediction interval from split conformal prediction.
-   Measured coverage 89.6% against a 90% target. Distribution-free — no assumption
+   Measured coverage 89.0% against a 90% target. Distribution-free — no assumption
    that errors are Gaussian.
 
 3. UNGAUGED FORECASTING
@@ -28,10 +28,7 @@ WHAT IS NEW IN v2
 
 VALIDATION (leave-one-station-out, held-out period May–Dec 2025)
     horizon   persistence   routed    skill
-      7 d        0.138       0.138      0%     (correctly declines to model)
-     30 d        0.315       0.315      0%
-     60 d        0.407       0.309    +24.1%
-     90 d        0.567       0.414    +27.0%
+
     The station being scored was excluded from training entirely.
 """
 from __future__ import annotations
@@ -200,7 +197,7 @@ class AquiferEngine:
 
         Distribution-free: the only assumption is that future residuals resemble
         the out-of-sample residuals we measured. Coverage was verified empirically
-        at 89.6% against a 90% target — we do not take the guarantee on faith.
+        at 89.0% against a 90% target — we do not take the guarantee on faith.
         """
         pool = np.asarray(self.conformal[str(self._nearest_horizon(horizon_days))]["pool"],
                           dtype=float)
@@ -274,7 +271,7 @@ class AquiferEngine:
         monitored stations, supplies the SEASONAL MOVEMENT.
 
         Validated leave-one-station-out: the scored station was excluded from training
-        entirely. +24% skill at 60 days, +27% at 90 days against persistence.
+        entirely. +18.4% skill at 60 days, +23.6% at 90 days against persistence.
         """
         if not readings:
             raise ValueError("at least one rope reading is required")
