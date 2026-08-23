@@ -1,7 +1,12 @@
-# NeerSurakhsha
+# 💧 NeerSurakhsha
 
 > **Smart groundwater-aware community health monitoring and
 > early-warning prototype for water-borne disease risk.**
+
+![Status](https://img.shields.io/badge/status-prototype-orange)
+![Model](https://img.shields.io/badge/model-v2.1-brightgreen)
+![Platform](https://img.shields.io/badge/platform-Expo%20%2B%20FastAPI-blue)
+![License](https://img.shields.io/badge/offline--first-yes-success)
 
 NeerSurakhsha connects a working groundwater model layer with an Expo
 mobile application and a lightweight FastAPI backend. The core idea is
@@ -19,30 +24,30 @@ the end-to-end demonstration.
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-- [Project Status](#project-status)
-- [Core Idea](#core-idea)
-- [System Architecture](#system-architecture)
-- [Technology Stack](#technology-stack)
-- [Model Layer](#model-layer)
-- [Groundwater API](#groundwater-api)
-- [Frontend Mobile App](#frontend-mobile-app)
-- [Backend API](#backend-api)
-- [Backend Setup](#backend-setup)
-- [Depth Sign Convention](#depth-sign-convention)
-- [Demo-Day Workflow](#demo-day-workflow)
-- [API Reference](#api-reference)
-- [Model Reported Metrics](#model-reported-metrics)
-- [What NOT to Build](#what-not-to-build)
-- [Implementation Priority](#implementation-priority)
-- [Development Principles](#development-principles)
-- [Project Status Summary](#project-status-summary)
-- [Final Demo Goal](#final-demo-goal)
+- [📊 Project Status](#-project-status)
+- [💡 Core Idea](#-core-idea)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🧰 Technology Stack](#-technology-stack)
+- [🧠 Model Layer](#-model-layer)
+- [🌊 Groundwater API](#-groundwater-api)
+- [📱 Frontend Mobile App](#-frontend-mobile-app)
+- [⚙️ Backend API](#️-backend-api)
+- [🛠️ Backend Setup](#️-backend-setup)
+- [📏 Depth Sign Convention](#-depth-sign-convention)
+- [🎬 Demo-Day Workflow](#-demo-day-workflow)
+- [📚 API Reference](#-api-reference)
+- [📈 Model Reported Metrics](#-model-reported-metrics)
+- [🚫 What NOT to Build](#-what-not-to-build)
+- [🏁 Implementation Priority](#-implementation-priority)
+- [🧭 Development Principles](#-development-principles)
+- [✅ Project Status Summary](#-project-status-summary)
+- [🎯 Final Demo Goal](#-final-demo-goal)
 
 ---
 
-## Project Status
+## 📊 Project Status
 
 | Layer | Status | Current State |
 |---|---|---|
@@ -67,7 +72,7 @@ The missing middle: frontend ↔ backend integration
 
 ---
 
-## Core Idea
+## 💡 Core Idea
 
 NeerSurakhsha uses groundwater behaviour as a health-risk signal.
 
@@ -102,7 +107,7 @@ Alert + action
 
 ---
 
-## System Architecture
+## 🏗️ System Architecture
 
 The project is organized around the following flow:
 
@@ -144,9 +149,9 @@ Mobile UI
 
 ---
 
-## Technology Stack
+## 🧰 Technology Stack
 
-### Mobile
+### 📱 Mobile
 
 - Expo SDK 51
 - Expo Router
@@ -162,19 +167,19 @@ The project brief explicitly says the required libraries are already
 installed and that additional libraries should not be added for this
 prototype.
 
-### Backend
+### ⚙️ Backend
 
 - Python
 - FastAPI
 - Uvicorn
 
-### Model / Analytics Layer
+### 🧠 Model / Analytics Layer
 
 The model layer is already complete and includes the groundwater
 engines/artifacts used by the API. Reproducible end-to-end in the public
 Kaggle notebook: https://www.kaggle.com/code/rishighosaltest/sih-model-v2
 
-### Persistence
+### 🗄️ Persistence
 
 A database is **not connected in the current prototype**. The model
 serves from precomputed artifacts in memory.
@@ -189,9 +194,9 @@ tables are:
 
 ---
 
-## Model Layer
+## 🧠 Model Layer
 
-### Current Status
+### 🟢 Current Status
 
 The model layer is:
 
@@ -209,7 +214,7 @@ The groundwater API exposes the model through seven endpoints.
 
 ---
 
-## Groundwater API
+## 🌊 Groundwater API
 
 All API endpoints are prefixed with:
 
@@ -219,7 +224,7 @@ All API endpoints are prefixed with:
 
 The groundwater router is already complete.
 
-### 1. List Groundwater Stations
+### 1️⃣ List Groundwater Stations
 
 ```http
 GET /api/v1/groundwater/stations
@@ -252,7 +257,7 @@ Example response:
 }
 ```
 
-### 2. Groundwater Forecast
+### 2️⃣ Groundwater Forecast
 
 ```http
 GET /api/v1/groundwater/{station}/forecast?horizon_days=60
@@ -263,7 +268,7 @@ Returns forecast, prediction interval, forecast method, and model rationale.
 The UI must not display a bare forecast number. It should show the
 forecast together with its uncertainty interval and explanation.
 
-### 3. Groundwater Time Series
+### 3️⃣ Groundwater Time Series
 
 ```http
 GET /api/v1/groundwater/{station}/series?limit=180
@@ -271,7 +276,7 @@ GET /api/v1/groundwater/{station}/series?limit=180
 
 Returns daily depth data suitable for charts.
 
-### 4. Sensor Health
+### 4️⃣ Sensor Health
 
 ```http
 GET /api/v1/groundwater/sensor-health
@@ -279,7 +284,7 @@ GET /api/v1/groundwater/sensor-health
 
 Returns information about which DWLR sensors should be distrusted.
 
-### 5. Groundwater Vulnerability
+### 5️⃣ Groundwater Vulnerability
 
 ```http
 GET /api/v1/groundwater/vulnerability
@@ -287,7 +292,7 @@ GET /api/v1/groundwater/vulnerability
 
 Returns measured rainfall-response lag per aquifer.
 
-### 6. Ungauged Village Forecast
+### 6️⃣ Ungauged Village Forecast
 
 ```http
 POST /api/v1/groundwater/ungauged/forecast
@@ -297,7 +302,7 @@ Forecasts groundwater behaviour for a village that has no sensor. This
 is one of the strongest features of the project because many villages
 will not have a dedicated groundwater sensor.
 
-### 7. Model Card
+### 7️⃣ Model Card
 
 ```http
 GET /api/v1/groundwater/model/card
@@ -307,7 +312,7 @@ Returns model capabilities and limitations as data.
 
 ---
 
-## Frontend Mobile App
+## 📱 Frontend Mobile App
 
 The mobile app is built with Expo.
 
@@ -323,7 +328,7 @@ app/
 
 These screens represent the core demonstration path.
 
-### API Connection — `lib/api.ts`
+### 🔌 API Connection — `lib/api.ts`
 
 The app should connect to the FastAPI backend using the laptop's LAN IP
 when testing on a physical phone.
@@ -373,7 +378,7 @@ Test immediately with a throwaway button calling `get('/groundwater/stations')`.
 ipconfig
 ```
 
-### Step 1 — Map (`app/map.tsx`)
+### 🗺️ Step 1 — Map (`app/map.tsx`)
 
 The map is the first screen that should be completed. Uses `react-native-maps`, already installed.
 
@@ -393,16 +398,16 @@ radius = 8 + max(0, 12 - min(depth_now_m, 12)) * 1.2
 
 **Risk colours:**
 
-| State | Colour |
-|---|---|
-| RED | `#A32D2D` |
-| AMBER_C | `#B5730E` |
-| AMBER_A | `#2B4A7D` |
-| WATCH | `#D98514` |
-| GREEN | `#4E8B2C` |
-| NO_DATA | `#8A9299` |
+| State | Icon | Colour |
+|---|---|---|
+| RED | 🔴 | `#A32D2D` |
+| AMBER_C | 🟠 | `#B5730E` |
+| AMBER_A | 🔵 | `#2B4A7D` |
+| WATCH | 🟡 | `#D98514` |
+| GREEN | 🟢 | `#4E8B2C` |
+| NO_DATA | ⚪ | `#8A9299` |
 
-### Step 2 — ASHA Report (`app/report.tsx`)
+### 📝 Step 2 — ASHA Report (`app/report.tsx`)
 
 The main field data-entry workflow.
 
@@ -415,7 +420,7 @@ The main field data-entry workflow.
 
 **UX constraint:** the target user may have difficulty reading. Prefer icons over text, use large buttons and tap targets, keep the interaction simple, and ask one question per screen where practical.
 
-### Offline-First Queue
+### 📴 Offline-First Queue
 
 Offline functionality is a core differentiator — do not remove it. Uses `AsyncStorage` + `expo-network`. Queue key: `pending_reports`.
 
@@ -478,7 +483,7 @@ Return synced count
 
 The reference flow uses `POST /api/v1/sources/vwsi/evaluate` for evaluation and requires the backend `/sync` endpoint for batch upload.
 
-### Step 3 — Ungauged Village Forecast (`app/village.tsx`)
+### 🏘️ Step 3 — Ungauged Village Forecast (`app/village.tsx`)
 
 This feature handles villages without a groundwater sensor — this is what separates the project from a monitoring dashboard. A health worker takes periodic marked-rope readings; six readings are considered sufficient for the prototype demonstration.
 
@@ -525,7 +530,7 @@ Returns:
 
 The worst-case value matters for public-health action: the point estimate (39) says "fine," the worst case (89) says "act." The advisory fires on the worst case because acting on the plausible worst case is the correct public-health posture.
 
-### Step 4 — Alerts (`app/alerts.tsx`)
+### 🚨 Step 4 — Alerts (`app/alerts.tsx`)
 
 `GET /api/v1/alerts` → state, station, margin, a plain-language explanation, and an `actions` array. Render actions as a checklist. No business logic needed client-side — the API already decided.
 
@@ -533,11 +538,11 @@ Severity order: `RED → AMBER_C → AMBER_A → WATCH → NO_DATA`.
 
 ---
 
-## Backend API
+## ⚙️ Backend API
 
 The groundwater router is complete. Three stubs remain.
 
-### 1. VWSI Evaluation
+### 1️⃣ VWSI Evaluation
 
 ```http
 POST /api/v1/sources/vwsi/evaluate
@@ -579,7 +584,7 @@ The reference implementation evaluates: current depth, faecal presence, days sin
 
 `vwsi.evaluate()` returns `state`, `C`, `H`, `A`, `buffer_margin_m`, a plain-language `explanation`, and an `actions` list. The frontend renders it directly — the client should not duplicate the business logic.
 
-### 2. Alerts
+### 2️⃣ Alerts
 
 ```http
 GET /api/v1/alerts
@@ -589,7 +594,7 @@ Evaluate stations, filter everything that is not GREEN, sort by severity, and re
 
 Severity order: `{RED:0, AMBER_C:1, AMBER_A:2, WATCH:3, NO_DATA:4}`.
 
-### 3. Sync
+### 3️⃣ Sync
 
 ```http
 POST /api/v1/sync
@@ -612,7 +617,7 @@ Example behaviour:
 → Return the 3 failed records
 ```
 
-### 4. Database — only if time allows
+### 4️⃣ Database — only if time allows
 
 Skip this for the prototype. The model serves from precomputed artifacts in memory and doesn't need a database. A working demo without persistence beats a half-finished migration.
 
@@ -620,7 +625,7 @@ If there's spare time, the minimum tables are: `water_source`, `health_report`, 
 
 ---
 
-## Backend Setup
+## 🛠️ Backend Setup
 
 ```bash
 cd neersurakhsha-backend
@@ -646,7 +651,7 @@ Open `http://localhost:8000/docs` — the Swagger UI should contain a groundwate
 
 ---
 
-## Depth Sign Convention
+## 📏 Depth Sign Convention
 
 **Read this before writing any code involving depth.**
 
@@ -667,7 +672,7 @@ The raw CGWB feed uses a negative sign for below-ground depth and is flipped dur
 
 ---
 
-## Demo-Day Workflow
+## 🎬 Demo-Day Workflow
 
 This is the most important end-to-end sequence. If other features fail, this workflow must still work.
 
@@ -684,7 +689,7 @@ This is the core story of the project. Rehearse it end to end at least three tim
 
 Keep the standalone console HTML on a USB stick as backup — no server, no internet, double-click and it works.
 
-### Demo Architecture
+### 🏛️ Demo Architecture
 
 ```text
                  AIRPLANE MODE
@@ -732,26 +737,26 @@ Keep the standalone console HTML on a USB stick as backup — no server, no inte
 
 ---
 
-## API Reference
+## 📚 API Reference
 
 All endpoints are prefixed with `/api/v1`.
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/groundwater/stations` | 15 stations with location, depth, margin, flag, vulnerability |
-| GET | `/groundwater/{station}/forecast?horizon_days=60` | Forecast + 90% interval + method + rationale |
-| GET | `/groundwater/{station}/series?limit=180` | Daily depth series for charts |
-| GET | `/groundwater/sensor-health` | Which DWLR sensors to distrust |
-| GET | `/groundwater/vulnerability` | Measured rainfall-response lag per aquifer |
-| POST | `/groundwater/ungauged/forecast` | Forecast for a village with no sensor |
-| GET | `/groundwater/model/card` | Model capabilities and limitations, as data |
-| POST | `/sources/vwsi/evaluate` | 🔴 to build — full health/VWSI evaluation |
-| GET | `/alerts` | 🔴 to build — operations alert queue |
-| POST | `/sync` | 🔴 to build — batch upload from the app |
+| Method | Endpoint | Purpose | Status |
+|---|---|---|---|
+| 🟢 GET | `/groundwater/stations` | 15 stations with location, depth, margin, flag, vulnerability | ✅ |
+| 🟢 GET | `/groundwater/{station}/forecast?horizon_days=60` | Forecast + 90% interval + method + rationale | ✅ |
+| 🟢 GET | `/groundwater/{station}/series?limit=180` | Daily depth series for charts | ✅ |
+| 🟢 GET | `/groundwater/sensor-health` | Which DWLR sensors to distrust | ✅ |
+| 🟢 GET | `/groundwater/vulnerability` | Measured rainfall-response lag per aquifer | ✅ |
+| 🟠 POST | `/groundwater/ungauged/forecast` | Forecast for a village with no sensor | ✅ |
+| 🟢 GET | `/groundwater/model/card` | Model capabilities and limitations, as data | ✅ |
+| 🟠 POST | `/sources/vwsi/evaluate` | Full health/VWSI evaluation | 🔴 to build |
+| 🟢 GET | `/alerts` | Operations alert queue | 🔴 to build |
+| 🟠 POST | `/sync` | Batch upload from the app | 🔴 to build |
 
 ---
 
-## Model Reported Metrics
+## 📈 Model Reported Metrics
 
 | Metric | Reported Result |
 |---|---|
@@ -765,7 +770,7 @@ All reproduced by the public Kaggle notebook: https://www.kaggle.com/code/rishig
 
 ---
 
-## What NOT to Build
+## 🚫 What NOT to Build
 
 Do not spend hackathon time on features explicitly cut from the prototype scope.
 
@@ -782,7 +787,7 @@ Build one screen that works completely rather than five that half-work.
 
 ---
 
-## Implementation Priority
+## 🏁 Implementation Priority
 
 If time becomes limited, implement in exactly this order:
 
@@ -800,7 +805,7 @@ Priorities 1–4 alone constitute a credible demo if time runs out.
 
 ---
 
-## Development Principles
+## 🧭 Development Principles
 
 1. **Do not duplicate model logic in the frontend.** The API decides the risk state; the frontend renders it.
 2. **Preserve uncertainty.** Never display only a forecast point estimate — always show forecast, prediction interval, confidence, rationale, and advisory together.
@@ -810,7 +815,7 @@ Priorities 1–4 alone constitute a credible demo if time runs out.
 
 ---
 
-## Project Status Summary
+## ✅ Project Status Summary
 
 **Already working:**
 - Groundwater model layer, artifacts, engine, router
@@ -835,7 +840,7 @@ Priorities 1–4 alone constitute a credible demo if time runs out.
 
 ---
 
-## Final Demo Goal
+## 🎯 Final Demo Goal
 
 ```text
 OFFLINE FIELD DATA
