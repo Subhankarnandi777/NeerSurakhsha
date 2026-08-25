@@ -1,5 +1,9 @@
 from typing import Optional, List
+<<<<<<< HEAD
 from pydantic import AliasChoices, BaseModel, Field
+=======
+from pydantic import BaseModel
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 
 class WaterSourceBase(BaseModel):
     name: str
@@ -11,6 +15,7 @@ class WaterSourceBase(BaseModel):
     householdsUsing: int
     lastTestResult: Optional[str] = None
     groundwaterTrend: Optional[str] = None
+<<<<<<< HEAD
     healthCasesCount: int = Field(
         default=0,
         validation_alias=AliasChoices("healthCasesCount", "health_cases_count"),
@@ -19,6 +24,10 @@ class WaterSourceBase(BaseModel):
         default=None,
         validation_alias=AliasChoices("riskExplanation", "risk_explanation"),
     )
+=======
+    healthCasesCount: int = 0
+    riskExplanation: Optional[List[str]] = None
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
     recommendedAlternativeId: Optional[str] = None
 
 class WaterSourceCreate(WaterSourceBase):

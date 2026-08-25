@@ -52,6 +52,7 @@ export default function TabsLayout() {
         }} 
       />
       <Tabs.Screen 
+<<<<<<< HEAD
         name="awareness" 
         options={{
           title: 'Awareness',
@@ -59,6 +60,8 @@ export default function TabsLayout() {
         }} 
       />
       <Tabs.Screen 
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
         name="alerts/[alertId]" 
         options={{
           href: null, // Hide from tab bar

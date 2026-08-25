@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useRef, useState, useEffect, useMemo } from 'react';
+=======
+import React, { useRef, useState, useEffect } from 'react';
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -10,11 +14,15 @@ import { useAppStore } from '../../store/main.store';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useNetwork } from '../../hooks/useNetwork';
+<<<<<<< HEAD
 import { WaterSource } from '../../types/source';
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 
 const { width } = Dimensions.get('window');
 
 export default function SafeWaterMap() {
+<<<<<<< HEAD
   const { sources, healthCases, fetchSources } = useAppStore();
   const router = useRouter();
   const isOnline = useNetwork();
@@ -22,10 +30,19 @@ export default function SafeWaterMap() {
   const [selectedSource, setSelectedSource] = useState<WaterSource | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [detailsExpanded, setDetailsExpanded] = useState(false);
+=======
+  const { sources } = useAppStore();
+  const router = useRouter();
+  const isOnline = useNetwork();
+  
+  const [selectedSource, setSelectedSource] = useState(sources.length > 0 ? sources[0] : null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
   
   const insets = useSafeAreaInsets();
   const webviewRef = useRef<WebView>(null);
 
+<<<<<<< HEAD
   // Pending field reports are included before server sync, so no unsafe source
   // is shown as safe while an ASHA worker is offline.
   const effectiveSources = useMemo(() => sources.map((source) => {
@@ -48,6 +65,14 @@ export default function SafeWaterMap() {
   useEffect(() => {
     setSelectedSource((current) => effectiveSources.find((source) => source.id === current?.id) ?? effectiveSources[0] ?? null);
   }, [effectiveSources]);
+=======
+  // Update selected source when sources arrive if it's null
+  useEffect(() => {
+    if (sources.length > 0 && !selectedSource) {
+      setSelectedSource(sources[0]);
+    }
+  }, [sources]);
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 
   useEffect(() => {
     (async () => {
@@ -75,6 +100,7 @@ export default function SafeWaterMap() {
   const dynamicDistance = location && selectedSource ? getDistance(userLat, userLng, selectedSource.lat, selectedSource.lng) : '1.2';
   const dynamicTime = location && selectedSource ? `EST. ${Math.round(parseFloat(dynamicDistance) * 12)} MIN WALK` : 'EST. 15 MIN WALK';
 
+<<<<<<< HEAD
   const findSafeAlternative = () => {
     if (!selectedSource) return;
     const safeSources = effectiveSources.filter(s => s.status === 'SAFE');
@@ -94,6 +120,8 @@ export default function SafeWaterMap() {
     setDetailsExpanded(false);
   };
 
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
   const leafletHTML = `
     <!DOCTYPE html>
     <html>
@@ -136,7 +164,11 @@ export default function SafeWaterMap() {
           radius: 8
         }).addTo(map);
 
+<<<<<<< HEAD
         const sources = ${JSON.stringify(effectiveSources)};
+=======
+        const sources = ${JSON.stringify(sources || [])};
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
         
         sources.forEach(source => {
           const isSafe = source.status === 'SAFE';
@@ -188,7 +220,11 @@ export default function SafeWaterMap() {
             try {
               const data = JSON.parse(event.nativeEvent.data);
               if (data.type === 'markerClick') {
+<<<<<<< HEAD
                 const src = effectiveSources.find(s => s.id === data.sourceId);
+=======
+                const src = sources.find(s => s.id === data.sourceId);
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
                 if (src) setSelectedSource(src);
               }
             } catch (e) {}
@@ -208,7 +244,11 @@ export default function SafeWaterMap() {
               </View>
               <View style={styles.legendItem}>
                 <View style={styles.legendDotAlert} />
+<<<<<<< HEAD
                 <Text style={styles.legendText}>Contaminated</Text>
+=======
+                <Text style={styles.legendText}>Alert</Text>
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
               </View>
             </View>
           </View>
@@ -234,11 +274,14 @@ export default function SafeWaterMap() {
                     <MaterialIcons name="check-circle" size={16} color={colors.onTertiary} />
                     <Text style={styles.statusBadgeSafeText}>SAFE</Text>
                   </View>
+<<<<<<< HEAD
                 ) : selectedSource.status === 'CONTAMINATION_RISK' ? (
                   <View style={[styles.statusBadgeMonitor, { borderColor: colors.secondary }]}>
                     <MaterialIcons name="visibility" size={16} color={colors.onSecondaryFixedVariant} />
                     <Text style={styles.statusBadgeMonitorText}>MONITOR</Text>
                   </View>
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
                 ) : (
                   <View style={[styles.statusBadgeAlert, { borderColor: colors.error }]}>
                     <MaterialIcons name="warning" size={16} color={colors.error} />
@@ -247,6 +290,7 @@ export default function SafeWaterMap() {
                 )}
               </View>
 
+<<<<<<< HEAD
               {detailsExpanded && (
                 <View style={styles.detailsGrid}>
                   <View style={styles.detailItem}>
@@ -272,11 +316,14 @@ export default function SafeWaterMap() {
                 </View>
               )}
 
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
               <View style={styles.routingBody}>
                 <View style={styles.routingStats}>
                   <Text style={styles.distanceText}>{dynamicDistance}<Text style={styles.distanceUnit}>km</Text></Text>
                   <Text style={styles.timeText}>{dynamicTime}</Text>
                 </View>
+<<<<<<< HEAD
                 <View style={{ flex: 1, gap: 8 }}>
                   <TouchableOpacity 
                     style={[styles.routeButton, styles.hcBorder, styles.hcShadow]}
@@ -316,6 +363,27 @@ export default function SafeWaterMap() {
           </View>
         )}
 
+=======
+                <TouchableOpacity 
+                  style={[styles.routeButton, styles.hcBorder, styles.hcShadow]}
+                  onPress={() => {
+                    if (!isOnline) {
+                      alert("Routing is unavailable while offline. Please use the straight-line distance estimate.");
+                    } else {
+                      const url = "https://www.google.com/maps/dir/?api=1&destination=" + selectedSource.lat + "," + selectedSource.lng;
+                      const { Linking } = require('react-native'); // trigger reload
+                      Linking.openURL(url);
+                    }
+                  }}
+                >
+                  <MaterialIcons name="directions-walk" size={24} color={colors.onSecondary} />
+                  <Text style={styles.routeButtonText}>START ROUTE</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
       </View>
     </View>
   );
@@ -424,15 +492,25 @@ const styles = StyleSheet.create({
   },
   fabContainer: {
     position: 'absolute',
+<<<<<<< HEAD
     // Keep voice input above the map content, never over the source details card.
     top: 88,
+=======
+    bottom: 200,
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
     right: 16,
     zIndex: 30,
   },
   fab: {
+<<<<<<< HEAD
     width: 56,
     height: 56,
     borderRadius: 28,
+=======
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
     backgroundColor: colors.secondary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -497,6 +575,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.error,
   },
+<<<<<<< HEAD
   statusBadgeMonitor: {
     backgroundColor: colors.secondaryFixed,
     borderWidth: 2,
@@ -512,6 +591,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.onSecondaryFixedVariant,
   },
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
   routingBody: {
     flexDirection: 'row',
     gap: 16,
@@ -552,6 +633,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     letterSpacing: 1,
   },
+<<<<<<< HEAD
   detailsButton: {
     paddingVertical: 8,
     alignItems: 'center',
@@ -600,4 +682,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     letterSpacing: 1,
   }
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 });

@@ -9,7 +9,11 @@ import { SourceStatus } from '../../types/source';
 
 export default function SelectSource() {
   const router = useRouter();
+<<<<<<< HEAD
   const { sources, selectedHealthSourceId, setSelectedHealthSourceId } = useAppStore();
+=======
+  const { sources } = useAppStore();
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 
   const getStatusColor = (status: SourceStatus) => {
     switch(status) {
@@ -56,6 +60,7 @@ export default function SelectSource() {
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <TouchableOpacity 
+<<<<<<< HEAD
               style={[
                 styles.card,
                 styles.hcBorder,
@@ -67,6 +72,10 @@ export default function SelectSource() {
               }}
               accessibilityRole="button"
               accessibilityLabel={`Select ${item.name}`}
+=======
+              style={[styles.card, styles.hcBorder, styles.hcShadow]}
+              onPress={() => router.back()}
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
             >
               <View style={styles.cardHeader}>
                 <View style={styles.idContainer}>
@@ -80,12 +89,16 @@ export default function SelectSource() {
                 </View>
               </View>
               
+<<<<<<< HEAD
               <View style={styles.nameRow}>
                 <Text style={styles.sourceName}>{item.name}</Text>
                 {selectedHealthSourceId === item.id && (
                   <MaterialIcons name="check-circle" size={22} color={colors.tertiary} />
                 )}
               </View>
+=======
+              <Text style={styles.sourceName}>{item.name}</Text>
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
               
               <View style={styles.cardDetails}>
                 <View style={styles.detailItem}>
@@ -164,11 +177,22 @@ const styles = StyleSheet.create({
   },
   hcBorder: {
     borderWidth: 2,
+<<<<<<< HEAD
     borderColor: colors.outlineVariant,
   },
   cardSelected: {
     borderColor: colors.tertiary,
     backgroundColor: colors.tertiaryContainer,
+=======
+    borderColor: colors.primary,
+  },
+  hcShadow: {
+    shadowColor: colors.primary,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
   },
   cardHeader: {
     flexDirection: 'row',
@@ -187,18 +211,24 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   sourceName: {
+<<<<<<< HEAD
     flex: 1,
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
     fontFamily: 'Inter_400Regular',
     fontSize: 16,
     color: colors.onSurfaceVariant,
     marginBottom: 12,
   },
+<<<<<<< HEAD
   nameRow: {
     alignItems: 'center',
     flexDirection: 'row',
     gap: 12,
     marginBottom: 12,
   },
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,

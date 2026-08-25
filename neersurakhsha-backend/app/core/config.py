@@ -1,5 +1,8 @@
 from typing import Optional
+<<<<<<< HEAD
 from pydantic import field_validator
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -17,6 +20,7 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8081"]
+<<<<<<< HEAD
 
     @field_validator("DEBUG", mode="before")
     @classmethod
@@ -25,6 +29,8 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return value.strip().lower() in {"1", "true", "yes", "on", "debug", "development"}
         return value
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

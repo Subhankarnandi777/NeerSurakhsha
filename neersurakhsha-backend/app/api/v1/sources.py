@@ -40,8 +40,13 @@ def create_source(
         householdsUsing=source_in.householdsUsing,
         lastTestResult=source_in.lastTestResult,
         groundwaterTrend=source_in.groundwaterTrend,
+<<<<<<< HEAD
         health_cases_count=source_in.healthCasesCount,
         risk_explanation=source_in.riskExplanation,
+=======
+        healthCasesCount=source_in.healthCasesCount,
+        riskExplanation=source_in.riskExplanation,
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
         recommendedAlternativeId=source_in.recommendedAlternativeId
     )
     db.add(source)

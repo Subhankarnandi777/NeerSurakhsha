@@ -1,5 +1,8 @@
 from typing import Any
+<<<<<<< HEAD
 import datetime
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -7,8 +10,11 @@ from app.api import deps
 from app.schemas.sync import SyncPayload, SyncResponse
 from app.models.health_report import HealthCase
 from app.models.water_source import WaterSource
+<<<<<<< HEAD
 from app.models.water_test import WaterTest
 from app.models.groundwater_reading import GroundwaterReading
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 
 router = APIRouter()
 
@@ -51,6 +57,7 @@ def sync_data(
                 recompute_source_status(db, source, new_case)
             synced_count += 1
             
+<<<<<<< HEAD
     synced_water_tests = 0
     if payload.waterTests:
         for wt in payload.waterTests:
@@ -91,6 +98,8 @@ def sync_data(
                 db.add(new_gw)
                 synced_gw_readings += 1
                 
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
     db.commit()
     
     # Return updated sources for the frontend to update its store
@@ -99,7 +108,10 @@ def sync_data(
     return SyncResponse(
         status="SUCCESS",
         syncedHealthCases=synced_count,
+<<<<<<< HEAD
         syncedWaterTests=synced_water_tests,
         syncedGroundwaterReadings=synced_gw_readings,
+=======
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
         updatedSources=updated_sources
     )

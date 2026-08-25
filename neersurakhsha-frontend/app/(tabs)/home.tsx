@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useMemo } from 'react';
+=======
+import React, { useState, useEffect } from 'react';
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, spacing, radius } from '../../theme';
@@ -12,12 +16,19 @@ import { Button } from '../../components/ui/Button';
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+<<<<<<< HEAD
   const { sources, healthCases, fetchSources } = useAppStore();
   const [sourceId, setSourceId] = useState('');
+=======
+  const { sources, fetchSources } = useAppStore();
+  const [sourceId, setSourceId] = useState('');
+  const [testResult, setTestResult] = useState<'SAFE' | 'UNSAFE' | null>(null);
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
+<<<<<<< HEAD
   // Matches the field-map safety rule. Pending ASHA reports are included before
   // sync so the dashboard never understates a developing cluster.
   const criticalSources = useMemo(() => sources.filter((source) => {
@@ -25,6 +36,9 @@ export default function Home() {
     const linkedCaseCount = source.healthCasesCount + pendingCases;
     return source.status === 'HIGH_RISK' || source.lastTestResult === 'Positive' || linkedCaseCount >= 3;
   }), [healthCases, sources]);
+=======
+  const highRiskSources = sources.filter(s => s.status === 'HIGH_RISK').length;
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
 
   useEffect(() => {
     fetchSources();
@@ -97,12 +111,18 @@ export default function Home() {
               <MaterialIcons name="warning" size={20} color={colors.secondary} />
             </View>
             <View style={styles.cardMetrics}>
+<<<<<<< HEAD
               <Text style={[styles.metricBig, { color: colors.secondary }]}>{criticalSources.length}</Text>
               <Text variant="body" color="onSurfaceVariant">{criticalSources.length === 1 ? 'Requires Action' : 'Require Action'}</Text>
+=======
+              <Text style={[styles.metricBig, { color: colors.secondary }]}>{highRiskSources}</Text>
+              <Text variant="body" color="onSurfaceVariant">Require Action</Text>
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
             </View>
           </Card>
         </View>
 
+<<<<<<< HEAD
         {/* Water Quality Test Button */}
         <View style={styles.testEntrySection}>
           <View style={styles.testEntryHeader}>
@@ -120,6 +140,70 @@ export default function Home() {
               icon={<MaterialIcons name="science" size={24} color={colors.onSecondary} />}
               onPress={() => router.push('/water-test')}
             />
+=======
+        {/* H2S Vial Test Entry */}
+        <View style={styles.testEntrySection}>
+          <View style={styles.testEntryHeader}>
+            <Text variant="title" color="primary" style={styles.testEntryTitle}>H2S Vial Test Entry</Text>
+            <Text variant="body" color="onSurfaceVariant">H2S ভাইল পৰীক্ষাৰ ফলাফল</Text>
+          </View>
+          
+          <Card variant="rugged" style={[styles.testEntryCard, isTablet && { maxWidth: 600, alignSelf: 'center', width: '100%' }]}>
+            {/* Source ID Input */}
+            <View style={styles.inputGroup}>
+              <Text variant="caption" color="primary" style={{ marginBottom: 8 }}>Source ID (উৎস ID)</Text>
+              <TextInput 
+                style={styles.textInput}
+                placeholder="e.g. W-1234"
+                placeholderTextColor={colors.outline}
+                value={sourceId}
+                onChangeText={setSourceId}
+              />
+            </View>
+
+            {/* Test Result Binary Selection */}
+            <View style={styles.inputGroup}>
+              <Text variant="caption" color="primary" style={{ marginBottom: 8 }}>Test Result (পৰীক্ষাৰ ফলাফল)</Text>
+              <View style={styles.binarySelection}>
+                <TouchableOpacity 
+                  style={[
+                    styles.binaryBtn, 
+                    testResult === 'SAFE' ? styles.binaryBtnSafeActive : null
+                  ]}
+                  onPress={() => setTestResult('SAFE')}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="check-circle" size={28} color={testResult === 'SAFE' ? colors.primary : colors.tertiaryContainer} />
+                  <Text variant="caption" style={{ color: testResult === 'SAFE' ? colors.primary : colors.tertiaryContainer, marginTop: 4 }}>SAFE (সুৰক্ষিত)</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[
+                    styles.binaryBtn, 
+                    testResult === 'UNSAFE' ? styles.binaryBtnUnsafeActive : null
+                  ]}
+                  onPress={() => setTestResult('UNSAFE')}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="cancel" size={28} color={testResult === 'UNSAFE' ? colors.error : colors.error} />
+                  <Text variant="caption" style={{ color: colors.error, marginTop: 4 }}>UNSAFE (অসুৰক্ষিত)</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {testResult && sourceId && (
+              <Button 
+                title="SUBMIT TEST" 
+                variant="primary" 
+                style={{ marginTop: spacing.md }}
+                onPress={() => {
+                  // Connect to the store or API here
+                  setSourceId('');
+                  setTestResult(null);
+                }}
+              />
+            )}
+>>>>>>> 559c10258b8859c7ff71cb71d7ac8eb51d12222f
           </Card>
         </View>
 
